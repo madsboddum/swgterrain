@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'dk.madsboddum'
-version '1.0-SNAPSHOT'
+version '1.0.1'
 
 repositories {
     mavenCentral()
@@ -17,4 +17,9 @@ dependencies {
 	
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-math3
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+}
+
+task customFatJar(type: Jar) {
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	with jar
 }

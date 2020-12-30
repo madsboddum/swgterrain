@@ -44,7 +44,6 @@ public class AffectorHeightFractal extends HeightLayer {
 
 	@Override
 	public void loadData(IoBuffer buffer) {
-		//System.out.println(Utilities.getHexString(buffer.array()));
 		fractal_id = buffer.getInt();
 		transform_type = buffer.getInt();
 		height_val = buffer.getFloat();

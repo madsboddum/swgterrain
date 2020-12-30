@@ -184,7 +184,6 @@ public class TerrainVisitor implements VisitorInterface {
 		popToParent(depth);
 		
 		String last_folder = foldername_stack.peekFirst();
-		//System.out.println(last_folder);
 		if(nodename.endsWith("DATA")) {
 			if("IHDRFORM".equals(last_folder)) {
 				
@@ -449,8 +448,6 @@ public class TerrainVisitor implements VisitorInterface {
 					break;
 			}
 			
-			//System.out.println("Tranform value after filter: " + transform_value);
-	
 			if (layer.filtersInverted())
 				transform_value = 1.0f - transform_value;
 				
@@ -461,7 +458,6 @@ public class TerrainVisitor implements VisitorInterface {
 					if (affector.isEnabled())
 					{
 						base_value = affector.process(x, z, transform_value * affector_transform, base_value, this);
-						//System.out.println("Affector Height: " + base_value);
 					}
 				}
 	
@@ -472,10 +468,7 @@ public class TerrainVisitor implements VisitorInterface {
 						Pair<Float, Float> pair = processLayerHeight((ListLayer)child, x, z, base_value, affector_transform * transform_value);
 						//transform_value = pair.first;
 						base_value = pair.second;
-						//System.out.println("Child Layer Height: " + base_value);
-					} /*else {
-						break;
-					}*/
+					}
 				}
 			}
 		}

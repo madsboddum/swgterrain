@@ -170,12 +170,10 @@ public class FilterBitmap extends FilterLayer {
 		if(bitmap == null) {
 			bitmap = ti.getBitmapGroup().getBitmaps().get(bitmapId);
 			if(bitmap == null) {
-				System.out.println("Didnt find bitmap for filter");
+				// Didnt find bitmap for filter
 				return 1;
 			}
 		}
-		//System.out.println("Using bitmap: " + bitmap.getFileName());
-		//System.out.println("rect minx : " + rectangle.minX + " rect minZ : " + rectangle.minZ + " rect maxX: " + rectangle.maxX + " rect maxZ: " + rectangle.maxZ);
 		float width = bitmap.getWidth();
 		float height = bitmap.getHeight();
 		float same_as_width_height = width;
@@ -187,11 +185,9 @@ public class FilterBitmap extends FilterLayer {
 		float transformedZ = (z - rectangle.minZ) * height / (rectangle.maxZ - rectangle.minZ);
 		
 		if (transformedX > width - 1) {
-			System.out.println("transformed x exceeded boundary");
 			transformedX = width - 1;
 		}
 		if (transformedZ > height - 1) {
-			System.out.println("transformed z exceeded boundary");
 			transformedZ = height - 1;
 		}
 		
@@ -231,7 +227,6 @@ public class FilterBitmap extends FilterLayer {
 		arg2 = v32;
 		arg1 = v33;
 		float result = 0;
-		//System.out.println("map result: " + mapResult + " min: " + min + " max: " + max);
 		
 		if (mapResult > arg6 && mapResult < arg1) {
 			float v35 = (float) ((arg1 - arg6) * arg2 * 0.5);

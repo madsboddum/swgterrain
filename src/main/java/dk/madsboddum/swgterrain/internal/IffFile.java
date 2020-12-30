@@ -5,6 +5,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import java.io.File;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class IffFile {
 	
@@ -109,13 +110,12 @@ public class IffFile {
 		}
 		
 				
-		String name = buf.getString(length, Charset.forName("US-ASCII").newDecoder());
+		String name = buf.getString(length, StandardCharsets.US_ASCII.newDecoder());
 								
 		int size = Integer.reverseBytes(buf.getInt());
 		
 		if(size > buf.remaining()) {
 			if(name.length() > 0)
-				System.out.println("Bad client file, remaining buffer size: " + buf.remaining() + " parsed size: " + size + " parsed Name: " + name);
 			return;
 		}
 		

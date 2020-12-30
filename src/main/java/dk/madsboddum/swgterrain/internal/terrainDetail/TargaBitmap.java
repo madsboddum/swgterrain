@@ -49,8 +49,6 @@ public class TargaBitmap {
 		@Override
 		public void read(IoBuffer buffer, int bytes) throws IOException {
 			val = (char) buffer.get();
-			if(val < 0)
-				System.out.println("negative value");
 		}
 	}
 	
@@ -115,9 +113,7 @@ public class TargaBitmap {
 		
 		int skiplength = idlength + (colourmaptype * colourmaplength);
 		buffer.skip(skiplength);
-		System.out.println("Skipping: " + skiplength + " file: " + filePath);
 		int bytes = bitsperpixel / 8;
-		//System.out.println(pixelData.length);
 		if(width <= height) {
 			for (int i = width - 1; i >= 0; --i) {
 				for (int j = 0; j < height; ++j) {
@@ -148,7 +144,6 @@ public class TargaBitmap {
 		if (offset < 0 || offset >= width * height)
 			throw new ArrayIndexOutOfBoundsException(offset);
 		char value = ((TargaBlackPixel) pixelData[offset]).val;
-		//System.out.println("TGA pixel value: " + (byte) value);
 		return value;
 	}
 
