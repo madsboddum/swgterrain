@@ -9,14 +9,18 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+test {
+	useJUnitPlatform()
+}
 
-	// https://mvnrepository.com/artifact/org.apache.mina/mina-core
+dependencies {
 	compile group: 'org.apache.mina', name: 'mina-core', version: '2.1.4'
-	
-	// https://mvnrepository.com/artifact/org.apache.commons/commons-math3
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+	
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
+	testCompile("org.junit.jupiter:junit-jupiter-params:5.7.0")
+	
+	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.1'
 }
 
 task customFatJar(type: Jar) {
