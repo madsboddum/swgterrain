@@ -13,7 +13,7 @@ public class IffFile {
 	 * Reads in a client file, and uses the given interpreter to interpret the data.
 	 * See {@link VisitorInterface}
 	 * 
-	 * @param file the file to read
+	 * @param input the file to read
 	 * @param i the interpreter to use
 	 */
 		
