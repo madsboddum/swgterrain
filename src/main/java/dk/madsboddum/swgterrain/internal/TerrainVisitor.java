@@ -467,7 +467,10 @@ public class TerrainVisitor implements VisitorInterface {
 					if (child.isEnabled() && child instanceof ListLayer) {
 						Pair<Float, Float> pair = processLayerHeight((ListLayer)child, x, z, base_value, affector_transform * transform_value);
 						//transform_value = pair.first;
-						base_value = pair.second;
+						
+						if (Math.abs(pair.second) > Math.abs(base_value)) {
+							base_value = pair.second;
+						}
 					}
 				}
 			}

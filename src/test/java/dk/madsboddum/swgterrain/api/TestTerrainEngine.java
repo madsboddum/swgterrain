@@ -1,6 +1,5 @@
 package dk.madsboddum.swgterrain.api;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestTerrainEngine {
 	
-	private TerrainEngine engine;
-	
 	private static TerrainEngine createEngine(String fileName) throws URISyntaxException {
 		URL resource = TestTerrainEngine.class.getClassLoader().getResource(fileName);
 		assert resource != null;
@@ -26,18 +23,20 @@ public class TestTerrainEngine {
 		return new TerrainEngine(new File(uri));
 	}
 	
-	@BeforeEach
-	public void setup() throws URISyntaxException {
-		engine = createEngine("corellia.trn");
-	}
-	
 	@Nested
 	class HeightCoordinateReading {
 		
+		private TerrainEngine engine;
+		
+		@BeforeEach
+		public void setup() throws URISyntaxException {
+			engine = createEngine("endor.trn");
+		}
+		
 		@Test
 		public void testCanReadHeightCoordinate() {
-			double actual = engine.getHeight(1234, 3214);
-			double expected = 141.53;
+			double actual = engine.getHeight(-930, 1635);
+			double expected = 98.96;
 			
 			assertEquals(expected, actual, 0.01, "Unexpected height coordinate");
 		}
@@ -45,6 +44,13 @@ public class TestTerrainEngine {
 	
 	@Nested
 	class WaterDetection {
+		
+		private TerrainEngine engine;
+		
+		@BeforeEach
+		public void setup() throws URISyntaxException {
+			engine = createEngine("corellia.trn");
+		}
 		
 		@Test
 		public void testCanDetectWaterPositive() {
@@ -69,6 +75,8 @@ public class TestTerrainEngine {
 		@ValueSource(strings = {
 				"corellia.trn",
 				"dantooine.trn",	// Dantooine has some odd empty nodes that require special handling
+				"endor.trn",
+				"tatooine.trn",
 		})
 		public void load(String fileName) throws URISyntaxException {
 			TerrainEngine engine = createEngine(fileName);

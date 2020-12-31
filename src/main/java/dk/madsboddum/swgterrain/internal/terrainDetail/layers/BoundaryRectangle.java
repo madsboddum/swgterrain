@@ -7,6 +7,10 @@ public class BoundaryRectangle extends BoundaryLayer {
 	float x1, z1;
 	float x2, z2;
 	
+	public BoundaryRectangle() {
+		type = LayerType.BREC;
+	}
+	
 	@Override
 	public boolean isContained(float px, float pz) {
 		
