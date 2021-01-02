@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class TerrainVisitor implements VisitorInterface {
-
+	
 	//Temporary Data
 	private Deque<Pair<Layer, Integer>> layer_stack;
 	private Deque<String> foldername_stack;
@@ -26,12 +26,11 @@ public class TerrainVisitor implements VisitorInterface {
 	private String filename;
 	private float map_width;
 	private float chunk_width;
-	private int   tiles_per_chunk;
-	private int   use_global_water_height;
+	private int tiles_per_chunk;
+	private int use_global_water_height;
 	private float global_water_height;
-
-	Map<Integer, FractalFamily> fractal_families;
 	
+	Map<Integer, FractalFamily> fractal_families;
 	
 	ListLayer head_nodes;
 	List<BoundaryPolygon> water_boundaries;
@@ -39,13 +38,14 @@ public class TerrainVisitor implements VisitorInterface {
 	public TerrainVisitor() {
 		
 		//Static Init
-		if(layerLookup == null) {
+		if (layerLookup == null) {
 			Map<String, Class<? extends Layer>> map = new TreeMap<String, Class<? extends Layer>>();
 			map.put("LAYRFORM", ListLayer.class);
 			
 			map.put("AHCNFORM", AffectorHeightConstant.class);
 			map.put("AHFRFORM", AffectorHeightFractal.class);
 			map.put("AHTRFORM", AffectorHeightTerrace.class);
+			map.put("AROAFORM", AffectorRoad.class);
 			
 			map.put("BCIRFORM", BoundaryCircle.class);
 			map.put("BPOLFORM", BoundaryPolygon.class);
@@ -92,23 +92,20 @@ public class TerrainVisitor implements VisitorInterface {
 		LayerType lt;
 		
 		int count = 0;
-		while(itr.hasNext()) {
+		while (itr.hasNext()) {
 			lay = itr.next();
 			
 			lt = lay.getType();
-			if(lt == LayerType.CONTAINER) {
-				int inner_count = prune_layers((ListLayer)lay);
-				if(inner_count > 0) {
+			if (lt == LayerType.CONTAINER) {
+				int inner_count = prune_layers((ListLayer) lay);
+				if (inner_count > 0) {
 					count += inner_count;
 				} else {
 					itr.remove();
 				}
-			} else if(	lt == LayerType.AHCN || lt == LayerType.AHFR || lt == LayerType.AHTR || 
-						lt == LayerType.FHGT || lt == LayerType.FFRA || 
-						lt == LayerType.FSLP || lt == LayerType.FDIR || lt == LayerType.FBIT) {
+			} else if (lt == LayerType.AHCN || lt == LayerType.AHFR || lt == LayerType.AHTR || lt == LayerType.FHGT || lt == LayerType.FFRA || lt == LayerType.FSLP || lt == LayerType.FDIR || lt == LayerType.FBIT) {
 				++count;
-			} else if(	lt == LayerType.BCIR || lt == LayerType.BPLN ||
-						lt == LayerType.BPOL || lt == LayerType.BREC) {
+			} else if (lt == LayerType.BCIR || lt == LayerType.BPLN || lt == LayerType.BPOL || lt == LayerType.BREC) {
 				//We want to keep this unless no heights were found, so 
 				//NOP
 			} else {
@@ -119,63 +116,63 @@ public class TerrainVisitor implements VisitorInterface {
 	}
 	
 	private void popToParent(int depth) {
-		while(depth < foldername_stack.size()) {
+		while (depth < foldername_stack.size()) {
 			foldername_stack.pop();
 		}
 		
-		while(layer_stack.size() > 0 && depth < layer_stack.peek().second) {
+		while (layer_stack.size() > 0 && depth < layer_stack.peek().second) {
 			layer_stack.pop();
 		}
 	}
-
+	
 	public String getFilename() {
 		return filename;
 	}
-
+	
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
-
+	
 	public float getMapWidth() {
 		return map_width;
 	}
-
+	
 	public void setMapWidth(float map_width) {
 		this.map_width = map_width;
 	}
-
+	
 	public float getChunkWidth() {
 		return chunk_width;
 	}
-
+	
 	public void setChunkWidth(float chunk_width) {
 		this.chunk_width = chunk_width;
 	}
-
+	
 	public int getTilesPerChunk() {
 		return tiles_per_chunk;
 	}
-
+	
 	public void setTilesPerChunk(int tiles_per_chunk) {
 		this.tiles_per_chunk = tiles_per_chunk;
 	}
-
+	
 	public int getUseGlobalWaterHeight() {
 		return use_global_water_height;
 	}
-
+	
 	public void setUseGlobalWaterHeight(int use_global_water_height) {
 		this.use_global_water_height = use_global_water_height;
 	}
-
+	
 	public float getGlobalWaterHeight() {
 		return global_water_height;
 	}
-
+	
 	public void setGlobalWaterHeight(float global_water_height) {
 		this.global_water_height = global_water_height;
 	}
-
+	
 	public FractalFamily getFractal(int id) {
 		return fractal_families.get(id);
 	}
@@ -184,37 +181,37 @@ public class TerrainVisitor implements VisitorInterface {
 		popToParent(depth);
 		
 		String last_folder = foldername_stack.peekFirst();
-		if(nodename.endsWith("DATA")) {
-			if("IHDRFORM".equals(last_folder)) {
+		if (nodename.endsWith("DATA")) {
+			if ("IHDRFORM".equals(last_folder)) {
 				
 				//Find out what type to make
 				Iterator<String> it = foldername_stack.iterator();
 				String layerType = null;
-				for(int i = 0; i < 3; ++i) {
+				for (int i = 0; i < 3; ++i) {
 					layerType = it.next();
 				}
 				
 				//Make that type.
 				Class<? extends Layer> cla = layerLookup.get(layerType);
-				if(cla != null) {
+				if (cla != null) {
 					Layer newLayer = cla.newInstance();
 					
 					newLayer.loadHeader(data);
 					
-					((ListLayer)layer_stack.peek().first).addChild(newLayer);
-					layer_stack.push(new Pair<Layer, Integer>(newLayer, depth-3));
+					((ListLayer) layer_stack.peek().first).addChild(newLayer);
+					layer_stack.push(new Pair<Layer, Integer>(newLayer, depth - 3));
 					
-					if(newLayer instanceof BoundaryPolygon) {
-						if(((BoundaryPolygon)newLayer).useWaterHeight()) {
+					if (newLayer instanceof BoundaryPolygon) {
+						if (((BoundaryPolygon) newLayer).useWaterHeight()) {
 							water_boundaries.add((BoundaryPolygon) newLayer);
 						}
 					}
 				} else {
 					Layer newLayer = new NullLayer();
-					layer_stack.push(new Pair<Layer, Integer>(newLayer, depth-3));
+					layer_stack.push(new Pair<Layer, Integer>(newLayer, depth - 3));
 				}
 				
-			} else if("PTATFORM".equals(last_folder)) {
+			} else if ("PTATFORM".equals(last_folder)) {
 				//Header
 				filename = data.getString(ascii_charset);
 				ascii_charset.reset();
@@ -225,21 +222,13 @@ public class TerrainVisitor implements VisitorInterface {
 				use_global_water_height = data.getInt();
 				global_water_height = data.getFloat();
 				
-			} /*else if("MGRPFORM".equals(last_folder)) {
-				
-				if("MFAMDATA".equals(nodename)) {
-					BitmapFamily family = new BitmapFamily();
-					family.loadData(data);
-					bitmapGroup.addBitmapFamily(family);
-				}
-				
-			}*/ else if("MFAMDATA".equals(nodename)) {
+			} else if ("MFAMDATA".equals(nodename)) {
 				FractalFamily fractal = new FractalFamily();
 				int position = data.position();
 				fractal.setFractal_id(data.getInt());
 				fractal.setFractal_label(data.getString(ascii_charset));
 				ascii_charset.reset();
-				if(data.hasRemaining()) {
+				if (data.hasRemaining()) {
 					data.position(position);
 					BitmapFamily family = new BitmapFamily();
 					family.loadData(data);
@@ -249,7 +238,7 @@ public class TerrainVisitor implements VisitorInterface {
 					fractal_families.put(fractal.getFractal_id(), fractal);
 					lastFamily = fractal;
 				}
-			} else if("MFRCFORM".equals(last_folder)) {
+			} else if ("MFRCFORM".equals(last_folder)) {
 				FractalFamily f = lastFamily;
 				
 				f.setSeed(data.getInt());
@@ -272,13 +261,13 @@ public class TerrainVisitor implements VisitorInterface {
 				
 				f.setCombination_type(data.getInt());
 				
-			} else if(nodename.equals("DATA")) {
-				if(data.remaining() >= 4)
+			} else if (nodename.equals("DATA")) {
+				if (data.remaining() >= 4)
 					layer_stack.peek().first.loadData(data);
 			}
-		} else if(nodename.equals("ADTA")) {
+		} else if (nodename.equals("ADTA")) {
 			layer_stack.peek().first.loadData(data);
-		} else if(nodename.equals("DATAPARM")) {
+		} else if (nodename.equals("DATAPARM")) {
 			layer_stack.peek().first.loadData(data);
 		}
 	}
@@ -289,221 +278,192 @@ public class TerrainVisitor implements VisitorInterface {
 		foldername_stack.push(nodeName);
 	}
 	
-	public float getWaterHeight(float x, float z)
-	{
-		for (BoundaryPolygon boundary : water_boundaries)
-		{
-			if (boundary.isContained(x, z))
-			{
+	public float getWaterHeight(float x, float z) {
+		for (BoundaryPolygon boundary : water_boundaries) {
+			if (boundary.isContained(x, z)) {
 				return boundary.getWaterHeight();
 			}
 		}
-	
-		if (use_global_water_height != 0)
-		{
+		
+		if (use_global_water_height != 0) {
 			return global_water_height;
 		}
 		
 		return Float.NaN;
 	}
 	
-	public boolean isWater(float x, float z)
-	{
+	public boolean isWater(float x, float z) {
 		float water_height;
 		float height;
-	
-		if ((water_height = getWaterHeight(x, z)) != Float.NaN)
-		{
+		
+		if ((water_height = getWaterHeight(x, z)) != Float.NaN) {
 			height = getHeight(x, z);
 			if (height <= water_height)
 				return true;
 		}
-	
+		
 		return false;
 	}
 	
 	@SuppressWarnings("unused")
-	private Layer findLayer(float x, float z)
-	{
-		for (Layer layer : head_nodes.getChildren())
-		{
-			if(layer instanceof ListLayer) {
+	private Layer findLayer(float x, float z) {
+		for (Layer layer : head_nodes.getChildren()) {
+			if (layer instanceof ListLayer) {
 				ListLayer ll = (ListLayer) layer;
-				for (BoundaryLayer boundary : ll.getBoundaries())
-				{
-					if (boundary.isContained(x, z))
-						return findLayerRecursive(x, z, ll);
-				} 
-			}
-		}
-	
-		return head_nodes.getChildren().get(0);
-	}
-	
-	private Layer findLayerRecursive(float x, float z, ListLayer rootLayer)
-	{
-		for (Layer layer : rootLayer.getChildren())
-		{
-			if(layer instanceof ListLayer) {
-				ListLayer ll = (ListLayer)layer;
-				for(BoundaryLayer boundary : ll.getBoundaries())
-				{
+				for (BoundaryLayer boundary : ll.getBoundaries()) {
 					if (boundary.isContained(x, z))
 						return findLayerRecursive(x, z, ll);
 				}
 			}
 		}
+		
+		return head_nodes.getChildren().get(0);
+	}
 	
+	private Layer findLayerRecursive(float x, float z, ListLayer rootLayer) {
+		for (Layer layer : rootLayer.getChildren()) {
+			if (layer instanceof ListLayer) {
+				ListLayer ll = (ListLayer) layer;
+				for (BoundaryLayer boundary : ll.getBoundaries()) {
+					if (boundary.isContained(x, z))
+						return findLayerRecursive(x, z, ll);
+				}
+			}
+		}
+		
 		return rootLayer;
 	}
 	
-	@SuppressWarnings("unused")
-	public float getHeight(float x, float z)
-	{
+	public float getHeight(float x, float z) {
 		float affector_transform = 1.0f;
-		float transform_value = 0.0f;
 		float height_result = 0.0f;
+		
+		for (Layer layer : head_nodes.getChildren()) {
 			
-		for(Layer layer : head_nodes.getChildren()) {
-	
 			if (layer.isEnabled()) {
-				if(layer instanceof ListLayer) {
-					Pair<Float, Float> res = processLayerHeight((ListLayer)layer, x, z, height_result, affector_transform);
+				if (layer instanceof ListLayer) {
+					Pair<Float, Float> res = processLayerHeight((ListLayer) layer, x, z, height_result, affector_transform);
 					
-					transform_value = res.first;
 					height_result = res.second;
 				}
 			}
 		}
-	
+		
 		return height_result;
 	}
 	
-	private Pair<Float, Float> processLayerHeight(ListLayer layer, float x, float z, float base_value, float affector_transform)
-	{
+	private Pair<Float, Float> processLayerHeight(ListLayer layer, float x, float z, float base_value, float affector_transform) {
 		List<BoundaryLayer> boundaries = layer.getBoundaries();
 		List<HeightLayer> heights = layer.getHeights();
 		List<FilterLayer> filters = layer.getFilters();
 	
 		float transform_value = 0.0f;
 		boolean has_boundaries = false;
-		//float result = 0.0f;
 		FilterRectangle rectangle = new FilterRectangle();
 		rectangle.minX = Float.MAX_VALUE;
 		rectangle.minZ = Float.MAX_VALUE;
-		//rectangle.maxX = Float.MIN_VALUE;
-		//rectangle.maxZ = Float.MIN_VALUE;
 		rectangle.maxX = -Float.MAX_VALUE;
 		rectangle.maxZ = -Float.MAX_VALUE;
 		
-		for (BoundaryLayer boundary : boundaries)
-		{
-				
+		for (BoundaryLayer boundary : boundaries) {
+			
 			if (!boundary.isEnabled())
 				continue;
 			else
 				has_boundaries = true;
-	
+			
 			float boundaryResult = boundary.process(x, z);
 			
-			if(boundaryResult != 0) {
-				if(boundary.getMinX() < rectangle.minX)
+			if (boundaryResult != 0) {
+				if (boundary.getMinX() < rectangle.minX)
 					rectangle.minX = boundary.getMinX();
-				if(boundary.getMinZ() < rectangle.minZ)
+				if (boundary.getMinZ() < rectangle.minZ)
 					rectangle.minZ = boundary.getMinZ();
-				if(boundary.getMaxX() > rectangle.maxX)
+				if (boundary.getMaxX() > rectangle.maxX)
 					rectangle.maxX = boundary.getMaxX();
-				if(boundary.getMaxZ() > rectangle.maxZ)
+				if (boundary.getMaxZ() > rectangle.maxZ)
 					rectangle.maxZ = boundary.getMaxZ();
 			}
 			
 			float r = calculateFeathering(boundaryResult, boundary.getFeatherType());
-	
+			
 			if (r > transform_value)
 				transform_value = r;
-	
+			
 			if (transform_value >= 1)
 				break;
 		}
-	
-		if (has_boundaries == false)
+		
+		if (!has_boundaries)
 			transform_value = 1.0f;
-	
+		
 		if (layer.boundariesInverted())
 			transform_value = 1.0f - transform_value;
-	
-		if (transform_value != 0) 
-		{
-			for(FilterLayer filter : filters) {
-					
+		
+		if (transform_value != 0) {
+			for (FilterLayer filter : filters) {
+				
 				if (!filter.isEnabled())
 					continue;
-	
+				
 				float r = calculateFeathering(filter.process(x, z, transform_value, base_value, this, rectangle), filter.getFeatherType());
-	
+				
 				if (transform_value > r)
 					transform_value = r;
-	
+				
 				if (transform_value == 0)
 					break;
 			}
 			
 			if (layer.filtersInverted())
 				transform_value = 1.0f - transform_value;
-				
-			if (transform_value != 0)
-			{
-				for(HeightLayer affector : heights) 
-				{
-					if (affector.isEnabled())
-					{
+			
+			if (transform_value != 0) {
+				for(HeightLayer affector : heights) {
+					if (affector.isEnabled()) {
 						base_value = affector.process(x, z, transform_value * affector_transform, base_value, this);
 					}
 				}
 	
 				List<Layer> children = layer.getChildren();
-				for(Layer child : children)
-				{
+				for (Layer child : children) {
 					if (child.isEnabled() && child instanceof ListLayer) {
-						Pair<Float, Float> pair = processLayerHeight((ListLayer)child, x, z, base_value, affector_transform * transform_value);
-						//transform_value = pair.first;
-						
-						if (Math.abs(pair.second) > Math.abs(base_value)) {
-							base_value = pair.second;
-						}
+						Pair<Float, Float> pair = processLayerHeight((ListLayer) child, x, z, base_value, affector_transform * transform_value);
+
+						base_value = pair.second;
 					}
 				}
 			}
 		}
-	
-		return new Pair<Float, Float>(transform_value, base_value);
+		
+		return new Pair<>(transform_value, base_value);
 	}
 	
 	private float calculateFeathering(float value, int featheringType) {
 		switch (featheringType) {
-		case 0:
-			return value;
-		case 1:
-			return value * value;
-		case 2:
-			return (float) Math.sqrt(value);
-		case 3:
-			return value * value * (3 - 2 * value);
-		default:
-			return 0;
+			case 0:
+				return value;
+			case 1:
+				return value * value;
+			case 2:
+				return (float) Math.sqrt(value);
+			case 3:
+				return value * value * (3 - 2 * value);
+			default:
+				return 0;
 		}
 	}
 	
 	public BitmapGroup getBitmapGroup() {
 		return bitmapGroup;
 	}
-
+	
 	public void setBitmapGroup(BitmapGroup bitmapGroup) {
 		this.bitmapGroup = bitmapGroup;
 	}
-
-	public class Pair<T,V> {
-
+	
+	public static class Pair<T, V> {
+		
 		public T first;
 		public V second;
 		

@@ -111,12 +111,14 @@ public class IffFile {
 				
 		String name = buf.getString(length, StandardCharsets.US_ASCII.newDecoder());
 		
+		int size;
+		
 		if ("".equals(name)) {	// Dantooine has empty nodes
 			buf.position(buf.limit());
-			return;
+			size = 0;
+		} else {
+			size = Integer.reverseBytes(buf.getInt());
 		}
-		
-		int size = Integer.reverseBytes(buf.getInt());
 		
 		if(size > buf.remaining()) {
 			if(name.length() > 0)
