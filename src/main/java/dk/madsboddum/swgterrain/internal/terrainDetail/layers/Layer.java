@@ -3,7 +3,7 @@ package dk.madsboddum.swgterrain.internal.terrainDetail.layers;
 import dk.madsboddum.swgterrain.internal.TerrainVisitor;
 import org.apache.mina.core.buffer.IoBuffer;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public abstract class Layer {
 	
@@ -29,7 +29,7 @@ public abstract class Layer {
 	
 	public void loadHeader(IoBuffer buffer) throws Exception {
 		enabled = buffer.getInt() != 0;
-		name = buffer.getString(Charset.forName("US-ASCII").newDecoder());
+		name = buffer.getString(StandardCharsets.US_ASCII.newDecoder());
 	}
 	
 	public abstract void loadData(IoBuffer buffer) throws Exception;
