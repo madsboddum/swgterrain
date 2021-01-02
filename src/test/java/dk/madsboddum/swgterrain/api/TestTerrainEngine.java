@@ -34,12 +34,21 @@ public class TestTerrainEngine {
 		}
 		
 		@Test
-		public void testCanReadHeightCoordinate() {
-			double actual = engine.getHeight(-930, 1635);
-			double expected = 98.96;
+		public void testCanReadHeightCoordinateAtEndorSmugglerOutpostBetweenHilltops() {
+			double actual = engine.getHeight(-935, 1555);
+			double expected = 76.00;
 			
 			assertEquals(expected, actual, 0.01, "Unexpected height coordinate");
 		}
+		
+		@Test
+		public void testCanReadHeightAtEndorSmugglerOutpostSmallHilltop() {
+			double actual = engine.getHeight(-1010, 1525);
+			double expected = 74.69;
+			
+			assertEquals(expected, actual, 0.01, "Unexpected height coordinate");
+		}
+
 	}
 	
 	@Nested
@@ -63,7 +72,7 @@ public class TestTerrainEngine {
 		public void testCanDetectWaterNegative() {
 			boolean water = engine.isWater(-6600, 2100);
 			
-			assertFalse(water, "The mountains on Corellia should not be considered water");
+			assertFalse(water, "The land on Corellia should not be considered water");
 		}
 	
 	}
